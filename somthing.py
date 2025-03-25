@@ -1,3 +1,4 @@
-number =int(input ("number?"))
-number2 =int(input ("seccond number?"))
-print (number + number2)
+
+name = input("hello whats you name?")
+mood = input("hello " + name)
+  
