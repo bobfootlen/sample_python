@@ -1,4 +1,4 @@
 
 name = input("hello whats you name?")
-mood = input("hello " + name)
+print("hello " + name)
   
