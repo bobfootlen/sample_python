@@ -6,12 +6,22 @@ import random
 def clamp(value, min_val, max_val):
     return max(min_val, min(value, max_val))
 
+def save_score(score):
+    with open("score.txt", "w") as f:
+        f.write(str(score))
+
+def load_score():
+    try:
+        with open("score.txt", "r") as f:
+            return int(f.read())
+    except FileNotFoundError:
+        return 0
 
 # Initialize PyGame
 pygame.init()
 
 # Set up screen
-WIDTH, HEIGHT = 1370, 770
+WIDTH, HEIGHT = 500, 500
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Idle Bouncer 3000")
 
@@ -53,10 +63,6 @@ class Ball:
         distance = math.hypot(dx, dy)
         return distance < self.radius + other.radius
     
-    def reverse(self):
-            self.vy *= -1
-            self.vx *= -1
-    
     def resolve_collision(b1, b2):
         dx = b1.x - b2.x
         dy = b1.y - b2.y
@@ -82,16 +88,16 @@ class Ball:
         b2.vx += dx * scale
         b2.vy += dy * scale
 
-
     @staticmethod
     def random_color():
         return random.randint(50, 255), random.randint(50, 255), random.randint(50, 255)
 
 balls = []
-
 balls.append(Ball(WIDTH // 2, HEIGHT // 2, 50))
 
-score = 0
+score = load_score()
+high_score = load_score()
+
 # Main loop
 running = True
 while running:
@@ -123,11 +129,15 @@ while running:
             if abs(b1.y - b2.y) > b1.radius + b2.radius: continue
             if b1.collides_with(b2):
                 b1.resolve_collision(b2)
-        
+    
+    # Update high score
+    if score > high_score:
+        save_score(score)
+    
     # Draw everything
     pygame.display.flip()
     
-    pygame.display.set_caption(f"Idle Bouncer 3000 score: {score} fps: {clock.get_fps():.2f}")
+    pygame.display.set_caption(f"Idle Bouncer 3000 Score: {score} High Score: {high_score} FPS: {clock.get_fps():.2f}")
 
 # Quit
 pygame.quit()
