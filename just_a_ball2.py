@@ -21,7 +21,7 @@ def load_score():
 pygame.init()
 
 # Set up screen
-WIDTH, HEIGHT = 500, 500
+WIDTH, HEIGHT = 1370, 770
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Idle Bouncer 3000")
 
@@ -137,7 +137,7 @@ while running:
     # Draw everything
     pygame.display.flip()
     
-    pygame.display.set_caption(f"Idle Bouncer 3000 Score: {score} High Score: {high_score} FPS: {clock.get_fps():.2f}")
+    pygame.display.set_caption(f"Idle Bouncer 3000 Score: {score} FPS: {clock.get_fps():.2f}")
 
 # Quit
 pygame.quit()

@@ -6,18 +6,18 @@ pygame.init()
 
 # Constants
 WIDTH, HEIGHT = 800, 600
-WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
-GRAVITY = 0.3
-JUMP_STRENGTH = -10
+GRAVITY = 0.5
+JUMP_STRENGTH = -12
 SPEED = 10
-ENEMY_SPEED = 2
+ENEMY_SPEED = 4
 
 # Setup display
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("2D Platformers")
+pygame.display.set_caption("Platformer")
 
 # Player setup
 player = pygame.Rect(100, 500, 40, 40)
@@ -35,7 +35,7 @@ enemy_direction = [1]  # 1 means right, -1 means left
 running = True
 clock = pygame.time.Clock()
 while running:
-    screen.fill(WHITE)
+    screen.fill(BLACK)
     
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
