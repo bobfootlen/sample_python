@@ -6,20 +6,23 @@ pygame.init()
 
 # Screen setup
 SCREEN_WIDTH = 500
-SCREEN_HEIGHT = 500  # Fixed the typo from HIGHT to HEIGHT
+SCREEN_HEIGHT = 500
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption('sprite test 01')
+pygame.display.set_caption('sprite move')
+face = 0
 
 # Load sprite
-sprite_sheet_image = pygame.image.load('spriteP1.png').convert_alpha()
+sprite_sheet_image = pygame.image.load('img/spriteP1.png').convert_alpha()
+
+backround_sheet_image = pygame.image.load('img/backround1.png').convert_alpha()
 
 # Background color
-BG = (200, 200, 200)
+BG = (50, 50, 50)
 
 # Sprite position
 x = 150
 y = 150
-speed = 10
+speed = 6
 
 # Game loop
 run = True
@@ -31,14 +34,21 @@ while run:
 
     # Key input
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_LEFT]:
+    if keys[pygame.K_a]:
         x -= speed
-    if keys[pygame.K_RIGHT]:
+        face = 'left'
+    if keys[pygame.K_d]:
         x += speed
-    if keys[pygame.K_UP]:
+        face = 'right'
+    if keys[pygame.K_w]:
         y -= speed
-    if keys[pygame.K_DOWN]:
+        face = 'up'
+    if keys[pygame.K_s]:
         y += speed
+        face = 'down'
+
+
+    screen.blit(backround_sheet_image, (0, 0))    
 
     # Draw the sprite at the new position
     screen.blit(sprite_sheet_image, (x, y))
