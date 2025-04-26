@@ -4,15 +4,19 @@ import pygame
 
 pygame.init()
 
+face = ("none")
+
 # Screen setup
 SCREEN_WIDTH = 500
 SCREEN_HEIGHT = 500
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('sprite move')
-face = 0
 
 # Load sprite
-sprite_sheet_image = pygame.image.load('img/spriteP1.png').convert_alpha()
+sprite_up = pygame.image.load('img/up.png').convert_alpha()
+sprite_down = pygame.image.load('img/down.png').convert_alpha()
+sprite_left = pygame.image.load('img/left.png').convert_alpha()
+sprite_right = pygame.image.load('img/right.png').convert_alpha()
 
 backround_sheet_image = pygame.image.load('img/backround1.png').convert_alpha()
 
@@ -36,22 +40,34 @@ while run:
     keys = pygame.key.get_pressed()
     if keys[pygame.K_a]:
         x -= speed
-        face = 'left'
+        face = ("left")
     if keys[pygame.K_d]:
         x += speed
-        face = 'right'
+        face = ("right")
     if keys[pygame.K_w]:
         y -= speed
-        face = 'up'
+        face = ("uper")
     if keys[pygame.K_s]:
         y += speed
-        face = 'down'
+        face = ("down")
 
 
-    screen.blit(backround_sheet_image, (0, 0))    
+    screen.blit(backround_sheet_image, (0, 0))
 
+    if face == ("uper") :
+        screen.blit(sprite_up, (x, y))
+    if face == ("down") :
+        screen.blit(sprite_down, (x, y))
+    if face == ("right") :
+        screen.blit(sprite_right, (x, y))
+    if face == ("left") :
+        screen.blit(sprite_left, (x, y))
+    if face == ("none") :
+        screen.blit(sprite_up, (x, y))
+    
+    
     # Draw the sprite at the new position
-    screen.blit(sprite_sheet_image, (x, y))
+    #screen.blit(sprite_up, (x, y))
 
     # Event handling
     for event in pygame.event.get():
