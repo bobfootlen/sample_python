@@ -24,9 +24,13 @@ backround_sheet_image = pygame.image.load('img/backround1.png').convert_alpha()
 BG = (50, 50, 50)
 
 # Sprite position
-x = 150
-y = 150
-speed = 6
+x = 0
+y = 0
+
+#player position
+player_x = 200
+player_y = 200
+speed = 5
 
 # Game loop
 run = True
@@ -39,40 +43,40 @@ while run:
     # Key input
     keys = pygame.key.get_pressed()
     if keys[pygame.K_a]:
-        x -= speed
+        x += speed
         face = ("left")
     if keys[pygame.K_d]:
-        x += speed
+        x -= speed
         face = ("right")
     if keys[pygame.K_w]:
-        y -= speed
-        face = ("uper")
-    if keys[pygame.K_s]:
         y += speed
+        face = ("up")
+    if keys[pygame.K_s]:
+        y -= speed
         face = ("down")
 
+#draws th backround
+    screen.blit(backround_sheet_image, (x, y))
 
-    screen.blit(backround_sheet_image, (0, 0))
 
-    if face == ("uper") :
-        screen.blit(sprite_up, (x, y))
+#changes which way P1 is facing
+    if face == ("up") :
+        screen.blit(sprite_up, (player_x, player_y))
     if face == ("down") :
-        screen.blit(sprite_down, (x, y))
+        screen.blit(sprite_down, (player_x, player_y))
     if face == ("right") :
-        screen.blit(sprite_right, (x, y))
+        screen.blit(sprite_right, (player_x, player_y))
     if face == ("left") :
-        screen.blit(sprite_left, (x, y))
+        screen.blit(sprite_left, (player_x, player_y))
     if face == ("none") :
-        screen.blit(sprite_up, (x, y))
-    
-    
-    # Draw the sprite at the new position
-    #screen.blit(sprite_up, (x, y))
+        screen.blit(sprite_up, (player_x, player_y))
 
     # Event handling
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
+
+    pygame.display.set_caption(f"python game: {x} {y} fps: {clock.get_fps():.2f}")
 
     pygame.display.update()
 
