@@ -1,5 +1,3 @@
-
-
 import pygame
 
 pygame.init()
@@ -18,6 +16,7 @@ sprite_down = pygame.image.load('img/down.png').convert_alpha()
 sprite_left = pygame.image.load('img/left.png').convert_alpha()
 sprite_right = pygame.image.load('img/right.png').convert_alpha()
 
+#loads the backround.png
 backround_sheet_image = pygame.image.load('img/backround1.png').convert_alpha()
 
 # Background color
@@ -37,7 +36,8 @@ run = True
 clock = pygame.time.Clock()
 
 while run:
-    clock.tick(60)  # Limit to 60 FPS
+    # Limit to 60 FPS
+    clock.tick(60)  
     screen.fill(BG)
 
     # Key input
@@ -55,7 +55,7 @@ while run:
         y -= speed
         face = ("down")
 
-#draws th backround
+#draws the backround
     screen.blit(backround_sheet_image, (x, y))
 
 
@@ -79,6 +79,7 @@ while run:
     if keys[pygame.K_0]:
         speed = 10
 
+#this controls the wall
     if (x) > (200):
         x = 200
     if (x) < (-9700):
@@ -94,6 +95,7 @@ while run:
         if event.type == pygame.QUIT:
             run = False
 
+#caption
     pygame.display.set_caption(f"python game: {x} {y} fps: {clock.get_fps():.2f}")
 
     pygame.display.update()
