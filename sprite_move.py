@@ -1,4 +1,4 @@
-#note this is chatgpt code
+
 
 import pygame
 
@@ -71,7 +71,25 @@ while run:
     if face == ("none") :
         screen.blit(sprite_up, (player_x, player_y))
 
-    # Event handling
+#lets you control your speed
+    if keys[pygame.K_1]:
+        speed = 1
+    if keys[pygame.K_5]:
+        speed = 5
+    if keys[pygame.K_0]:
+        speed = 10
+
+    if (x) > (200):
+        x = 200
+    if (x) < (-9700):
+        x = -9700
+    if (y) > (200):
+        y = 200
+    if (y) < (-9700):
+        y = -9700
+
+
+   # Event handling
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
