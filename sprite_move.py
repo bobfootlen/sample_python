@@ -16,6 +16,10 @@ sprite_down = pygame.image.load('img/down.png').convert_alpha()
 sprite_left = pygame.image.load('img/left.png').convert_alpha()
 sprite_right = pygame.image.load('img/right.png').convert_alpha()
 
+#trees
+tree_1 = pygame.image.load('img/tree-1.png').convert_alpha()
+tree_2 = pygame.image.load('img/tree-2.png').convert_alpha()
+
 #loads the backround.png
 backround_sheet_image = pygame.image.load('img/backround1.png').convert_alpha()
 
@@ -57,6 +61,8 @@ while run:
 
 #draws the backround
     screen.blit(backround_sheet_image, (x, y))
+    screen.blit(tree_1, (x + 300, y + 300))
+    screen.blit(tree_2, (x + 100, y + 100))
 
 
 #changes which way P1 is facing
@@ -70,6 +76,7 @@ while run:
         screen.blit(sprite_left, (player_x, player_y))
     if face == ("none") :
         screen.blit(sprite_up, (player_x, player_y))
+    
 
 #lets you control your speed
     if keys[pygame.K_1]:
