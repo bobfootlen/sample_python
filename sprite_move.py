@@ -1,8 +1,41 @@
 import pygame
+import socket
+import threading
+
+players = {}
+players_lock = threading.Lock()
+
+def add_or_update_player(remote_addr, state):
+    with players_lock:
+        players[remote_addr] = state
 
 pygame.init()
 
+client_mode = False
+
+remote = input("sever address")
 face = ("none")
+
+PORT = 5050
+
+client = None
+sever = None
+
+if remote:
+    client_mode = True
+    HOST = remote  # Change to host's IP address
+    PORT = 5050
+    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client.connect((HOST, PORT))
+    #client connect code
+else:
+    client_mode = False
+    HOST = ''
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.bind((HOST, PORT))
+server.listen(1)
+print("Waiting for connection...")
+    #sever startup code
 
 # Screen setup
 SCREEN_WIDTH = 500
@@ -24,7 +57,7 @@ tree_2 = pygame.image.load('img/tree-2.png').convert_alpha()
 backround_sheet_image = pygame.image.load('img/backround1.png').convert_alpha()
 
 # Background color
-BG = (0, 0, 0)
+BG = (50, 50, 50)
 
 # Sprite starting position
 x = 40
@@ -45,7 +78,7 @@ def handle_speed_input(keys,speed):
     if keys[pygame.K_5]:
         speed = 5
     if keys[pygame.K_0]:
-        speed = 10
+        speed = 20
     return speed
 
 def handle_facing(face, screen, sprite_up, sprite_down, sprite_left, sprite_right, player_x, player_y):
