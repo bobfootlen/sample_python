@@ -1,0 +1,8 @@
+players = {}
+players['geddy'] = {}
+players['alex'] = {}
+players['neil'] = {}
+players['geddy']['score'] = (200 , 200)
+players['alex']['score'] = 2
+players['neil']['score'] = 3
+print(players)

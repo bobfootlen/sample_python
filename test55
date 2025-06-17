@@ -1,0 +1,14 @@
+name = input("whats your usename ")
+
+my_dict = {'a': 1, 'bobfootlen': 'ip address', 'c': 3}
+
+if (name) in my_dict:
+    print("Found key 'b' with value:", my_dict[name])
+else:
+    new_name = input("name not found make one y/n ")
+    if new_name == ('y'):
+      make_new_name = input("what will your name be? ")
+      new_ip_address = input("whats you ip address ")
+    my_dict[make_new_name] = (new_ip_address)
+
+print (my_dict)
