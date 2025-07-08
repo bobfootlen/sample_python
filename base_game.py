@@ -2,6 +2,7 @@
 import pygame
 import socket
 import threading
+import traceback
 
 players = {}
 players_lock = threading.Lock()
@@ -23,19 +24,25 @@ client = None
 server = None
 
 clients = []
-players = {}
 
 def handle_receive(conn):
+    buffer = ""
     while True:
         try:
             data = conn.recv(1024)
+            print(data)
             if not data:
                 break
-            ip,port = conn.getpeername()
-            remote_x, remote_y = data.decode().split(",")
-            players[f"{ip}:{port}"] = {remote_x,remote_y}
+            buffer += data.decode()
+            if '\n' in buffer:
+                *_, last_line = buffer.strip().split('\n')
+                ip, port = conn.getpeername()
+                remote_x, remote_y = map(int, last_line.strip().split(","))
+                add_or_update_player(f"{ip}:{port}", (remote_x, remote_y))
+                buffer = ""  # clear buffer since we're discarding older data
         except:
-            break
+            traceback.print_exc()
+            #break
     conn.close()
 
 if remote:
@@ -184,7 +191,7 @@ while run:
     # Net Code
     if remote:
         ## client code
-        client.sendall(f"{x},{y}".encode())
+        client.sendall(f"\n{x},{y}".encode())
     else:
         ## send all info to very client
         ## server code
