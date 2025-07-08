@@ -185,7 +185,7 @@ while run:
     else:
         ## send all info to very client
         ## server code
-        if frame % 600:
+        if frame % 600 == 0:
             print(clients)
     
     #caption
