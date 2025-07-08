@@ -35,8 +35,8 @@ else:
     HOST = ''
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((HOST, PORT))
-server.listen(1)
-print("Waiting for connection...")
+    server.listen(1)
+    print("Waiting for connection...")
     #sever startup code
 
 # Screen setup
