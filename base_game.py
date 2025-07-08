@@ -20,9 +20,10 @@ face = ("none")
 PORT = 5000
 
 client = None
-sever = None
+server = None
 
 clients = []
+players = {}
 
 def handle_receive(conn):
     while True:
@@ -30,7 +31,9 @@ def handle_receive(conn):
             data = conn.recv(1024)
             if not data:
                 break
-            print("\nPeer:", data.decode())
+            ip,port = conn.getpeername()
+            remote_x, remote_y = data.decode().split(",")
+            players[f"{ip}:{port}"] = {remote_x,remote_y}
         except:
             break
     conn.close()
@@ -181,7 +184,7 @@ while run:
     # Net Code
     if remote:
         ## client code
-        client.sendall("Still here...".encode())
+        client.sendall(f"{x},{y}".encode())
     else:
         ## send all info to very client
         ## server code
