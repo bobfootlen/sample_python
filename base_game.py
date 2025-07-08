@@ -1,3 +1,4 @@
+#was sprite_move
 import pygame
 import socket
 import threading
