@@ -17,7 +17,7 @@ client_mode = False
 remote = input("sever address")
 face = ("none")
 
-PORT = 5050
+PORT = 5000
 
 client = None
 sever = None
