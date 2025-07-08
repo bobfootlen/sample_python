@@ -25,7 +25,6 @@ sever = None
 if remote:
     client_mode = True
     HOST = remote  # Change to host's IP address
-    PORT = 5050
     client_name = input("username ")
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client.connect((HOST, PORT))
