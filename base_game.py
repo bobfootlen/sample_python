@@ -28,6 +28,7 @@ if remote:
     client_name = input("username ")
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client.connect((HOST, PORT))
+    print("Connected.")
     #client connect code
 else:
     client_mode = False
