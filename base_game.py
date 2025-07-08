@@ -22,6 +22,19 @@ PORT = 5000
 client = None
 sever = None
 
+clients = []
+
+def handle_receive(conn):
+    while True:
+        try:
+            data = conn.recv(1024)
+            if not data:
+                break
+            print("\nPeer:", data.decode())
+        except:
+            break
+    conn.close()
+
 if remote:
     client_mode = True
     HOST = remote  # Change to host's IP address
@@ -37,8 +50,17 @@ else:
     server.bind((HOST, PORT))
     server.listen(1)
     print("Waiting for connection...")
-    server.accept()
-    #sever startup code
+    def accept_loop():
+        while True:
+            conn, addr = server.accept()
+            print("Connected by", addr)
+            clients.append(conn)
+            threading.Thread(target=handle_receive, args=(conn,), daemon=True).start()
+
+    threading.Thread(target=accept_loop, daemon=True).start()
+    
+
+
 
 # Screen setup
 SCREEN_WIDTH = 500
@@ -123,6 +145,8 @@ def key_inputs(speed,x,y,face):
         face = ("down")
     return face,x,y,keys
 
+frame = 0
+
 while run:
     # Limit to 60 FPS
     clock.tick(60)  
@@ -153,9 +177,20 @@ while run:
         if event.type == pygame.QUIT:
             run = False
 
-#caption
+
+    # Net Code
+    if remote:
+        ## client code
+        client.sendall("Still here...".encode())
+    else:
+        ## send all info to very client
+        ## server code
+        if frame % 600:
+            print(clients)
+    
+    #caption
     pygame.display.set_caption(f"python game: {x} {y} fps: {clock.get_fps():.2f}")
 
     pygame.display.update()
-
+    frame += 1
 pygame.quit()
