@@ -30,7 +30,7 @@ def handle_receive(conn):
     while True:
         try:
             data = conn.recv(1024)
-            print(data)
+            #print(data)
             if not data:
                 break
             buffer += data.decode()
