@@ -62,12 +62,15 @@ else:
     print("Waiting for connection...")
     def accept_loop():
         while True:
-            conn, addr = server.accept()
-            print("Connected by", addr)
-            clients.append(conn)
-            threading.Thread(target=handle_receive, args=(conn,), daemon=True).start()
+            accept_one()
 
-    threading.Thread(target=accept_loop, daemon=True).start()
+    def accept_one():
+        conn, addr = server.accept()
+        print("Connected by", addr)
+        clients.append(conn)
+        threading.Thread(target=handle_receive, args=(conn,), daemon=True).start()
+
+    threading.Thread(target=accept_one, daemon=True).start()
     
 
 
@@ -83,6 +86,12 @@ sprite_up = pygame.image.load('img/up.png').convert_alpha()
 sprite_down = pygame.image.load('img/down.png').convert_alpha()
 sprite_left = pygame.image.load('img/left.png').convert_alpha()
 sprite_right = pygame.image.load('img/right.png').convert_alpha()
+
+# Load sprite
+remote_up = pygame.image.load('img/remote_up.png').convert_alpha()
+remote_down = pygame.image.load('img/remote_down.png').convert_alpha()
+remote_left = pygame.image.load('img/rmote_left.png').convert_alpha()
+remote_right = pygame.image.load('img/remote_right.png').convert_alpha()
 
 #trees
 tree_1 = pygame.image.load('img/tree-1.png').convert_alpha()
@@ -173,6 +182,9 @@ while run:
 
 #changes which way P1 is facing
     handle_facing(face, screen, sprite_up, sprite_down, sprite_left, sprite_right, player_x, player_y)
+
+for player, (p_x,p_y) in players.items():
+    screen.blit(sprite_up, (p_x, p_y))
     
 
 #lets you control your speed
