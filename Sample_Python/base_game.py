@@ -174,17 +174,17 @@ while run:
     # Key input
     face, x, y, keys = key_inputs(speed,x,y,face)
 
-#draws the backround
+    #draws the backround
     screen.blit(backround_sheet_image, (x, y))
     screen.blit(tree_1, (x + 300, y + 300))
     screen.blit(tree_2, (x + 100, y + 100))
 
 
-#changes which way P1 is facing
+    #changes which way P1 is facing
     handle_facing(face, screen, sprite_up, sprite_down, sprite_left, sprite_right, player_x, player_y)
 
-for player, (p_x,p_y) in players.items():
-    screen.blit(sprite_up, (p_x, p_y))
+    for player, (p_x,p_y) in players.items():
+        screen.blit(sprite_up, (x, y))
     
 
 #lets you control your speed
