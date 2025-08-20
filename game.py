@@ -18,7 +18,6 @@ class Game:
         self.asset_manager = AssetManager()
         self.renderer = Renderer(self.screen, self.asset_manager)
         self.network_manager = NetworkManager()
-        self.network_manager.set_local_players_ref(self.players)
         
         # Initialize single player
         player1_input_map = {
@@ -32,8 +31,9 @@ class Game:
         }
 
         self.players = [
-            Player(x=200, y=200, speed=5, input_map=player1_input_map) # Only Player 1
+            Player(x=200, y=200, speed=5)
         ]
+        self.network_manager.set_local_players_ref(self.players)
         
         # Game state
         self.run = True
@@ -47,7 +47,7 @@ class Game:
         self.camera_x = 0
         self.camera_y = 0
         
-        self.setup_networking()
+        # Removed setup_networking from __init__
     
     def setup_networking(self):
         """Setup networking based on user input"""
@@ -145,4 +145,5 @@ class Game:
 
 if __name__ == "__main__":
     game = Game()
+    game.setup_networking()
     game.run_game()
