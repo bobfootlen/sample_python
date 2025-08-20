@@ -10,36 +10,57 @@ class Renderer:
         """Clear the screen with background color"""
         self.screen.fill(self.bg_color)
     
-    def draw_background(self, x, y):
-        """Draw the background at given coordinates"""
+    def draw_background(self, camera_x, camera_y):
+        """Draw the background at given coordinates, offset by camera"""
         background = self.asset_manager.get_background()
-        self.screen.blit(background, (x, y))
-    
-    def draw_trees(self, x, y):
-        """Draw trees at given coordinates"""
+        # Adjust background position by camera offset
+        self.screen.blit(background, (-camera_x, -camera_y))
+
+    def draw_trees(self, camera_x, camera_y):
+        """Draw trees at given coordinates, offset by camera"""
         tree_1 = self.asset_manager.get_tree('tree_1')
         tree_2 = self.asset_manager.get_tree('tree_2')
-        
-        self.screen.blit(tree_1, (x + 300, y + 300))
-        self.screen.blit(tree_2, (x + 100, y + 100))
-    
-    def draw_player(self, player, player_x, player_y):
-        """Draw the main player"""
+
+        # Adjust tree positions by camera offset
+        self.screen.blit(tree_1, (300 - camera_x, 300 - camera_y))
+        self.screen.blit(tree_2, (100 - camera_x, 100 - camera_y))
+
+    def draw_player(self, player, camera_x, camera_y):
+        """Draw a local player relative to the camera"""
         face = player.get_facing()
         sprite = self.asset_manager.get_sprite(face)
-        self.screen.blit(sprite, (player_x, player_y))
-    
-    def draw_remote_players(self, players, camera_x, camera_y):
-        """Draw all remote players"""
-        for player_addr, (p_x, p_y) in players.items():
-            # Draw remote players relative to camera position
+        # The local player being followed by camera is drawn at screen center
+        screen_x = self.screen.get_width() // 2
+        screen_y = self.screen.get_height() // 2
+
+        self.screen.blit(sprite, (screen_x, screen_y))
+
+    def draw_players(self, players, camera_x, camera_y):
+        """Draw all local players"""
+        # There's only one local player, so we draw it directly.
+        # This method is kept for consistency with how it's called in game.py
+        if players:
+            self.draw_player(players[0], camera_x, camera_y)
+
+    def draw_remote_players(self, remote_players, camera_x, camera_y):
+        """Draw all remote players, adjusting for camera position"""
+        for player_id, player_data in remote_players.items():
+            # Exclude the local player (player_id 1)
+            if player_id == 1:
+                continue
+
+            p_x = player_data['x']
+            p_y = player_data['y']
+            face = player_data['face']
+            
+            # Calculate screen coordinates relative to camera
             screen_x = p_x - camera_x
             screen_y = p_y - camera_y
-            # Use a default sprite for remote players
-            sprite = self.asset_manager.get_sprite('up')
+            # Use the received face for remote players
+            sprite = self.asset_manager.get_sprite(face)
             self.screen.blit(sprite, (screen_x, screen_y))
-    
-    def update_display(self, x, y, fps):
+
+    def update_display(self, x, y, fps, num_players):
         """Update the display caption with current info"""
-        pygame.display.set_caption(f"python game: {x} {y} fps: {fps:.2f}")
+        pygame.display.set_caption(f"python game: cam_x: {x} cam_y: {y} fps: {fps:.2f} players: {num_players}")
         pygame.display.update()

@@ -18,11 +18,21 @@ class Game:
         self.asset_manager = AssetManager()
         self.renderer = Renderer(self.screen, self.asset_manager)
         self.network_manager = NetworkManager()
+        self.network_manager.set_local_players_ref(self.players)
         
-        # Initialize multiple players
+        # Initialize single player
+        player1_input_map = {
+            'left': pygame.K_a,
+            'right': pygame.K_d,
+            'up': pygame.K_w,
+            'down': pygame.K_s,
+            'speed_1': pygame.K_1,
+            'speed_5': pygame.K_5,
+            'speed_0': pygame.K_0
+        }
+
         self.players = [
-            Player(player_id=1, x=200, y=200, speed=5),  # Player 1
-            Player(player_id=2, x=300, y=300, speed=5)   # Player 2
+            Player(x=200, y=200, speed=5, input_map=player1_input_map) # Only Player 1
         ]
         
         # Game state
@@ -31,7 +41,10 @@ class Game:
         self.frame = 0
         
         # Camera position (for scrolling background) - follows player 1
-        self.camera_x = 40
+        self.screen_center_x = self.SCREEN_WIDTH // 2
+        self.screen_center_y = self.SCREEN_HEIGHT // 2
+        
+        self.camera_x = 0
         self.camera_y = 0
         
         self.setup_networking()
@@ -67,10 +80,10 @@ class Game:
             # Handle wall boundaries
             player.handle_walls()
         
-        # Camera follows player 1
+        # Camera follows player 1, keeping player 1 centered
         player1_x, player1_y = self.players[0].get_position()
-        self.camera_x = player1_x
-        self.camera_y = player1_y
+        self.camera_x = player1_x - self.screen_center_x
+        self.camera_y = player1_y - self.screen_center_y
     
     def render(self):
         """Render the game"""
@@ -95,11 +108,16 @@ class Game:
     def network_update(self):
         """Handle networking updates"""
         if self.network_manager.is_client_mode():
-            # Send position of player 1 for networking
-            x, y = self.players[0].get_position()
-            self.network_manager.send_position(x, y)
+            # Send position and facing of player 1 for networking
+            player1 = self.players[0]
+            x, y = player1.get_position()
+            face = player1.get_facing()
+            self.network_manager.send_position(1, x, y, face)
         else:
-            # Server mode - print client info periodically
+            # Server mode - broadcast player info periodically
+            if self.frame % 10 == 0: # Broadcast every 10 frames
+                self.network_manager.broadcast_player_states()
+            # Also print client info periodically
             if self.frame % 600 == 0:
                 print(f"Connected clients: {len(self.network_manager.get_clients())}")
     
