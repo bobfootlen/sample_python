@@ -21,16 +21,16 @@ class Player:
     def handle_movement(self, keys):
         """Handle movement based on key input"""
         if keys[pygame.K_a]:
-            self.x += self.speed
+            self.x -= self.speed
             self.face = "left"
         if keys[pygame.K_d]:
-            self.x -= self.speed
+            self.x += self.speed
             self.face = "right"
         if keys[pygame.K_w]:
-            self.y += self.speed
+            self.y -= self.speed
             self.face = "up"
         if keys[pygame.K_s]:
-            self.y -= self.speed
+            self.y += self.speed
             self.face = "down"
         
         return self.face, self.x, self.y
