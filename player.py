@@ -39,12 +39,12 @@ class Player:
         """Handle wall boundaries"""
         if self.x < 0:
             self.x = 0
-        if self.x > 9700:
-            self.x = 9700
+        if self.x > 9900:
+            self.x = 9900
         if self.y < 0:
             self.y = 0
-        if self.y > 9700:
-            self.y = 9700
+        if self.y > 9900:
+            self.y = 9900
         return self.x, self.y
     
     def get_position(self):
