@@ -37,14 +37,14 @@ class Player:
     
     def handle_walls(self):
         """Handle wall boundaries"""
-        if self.x > 200:
-            self.x = 200
-        if self.x < -9700:
-            self.x = -9700
-        if self.y > 200:
-            self.y = 200
-        if self.y < -9700:
-            self.y = -9700
+        if self.x < 0:
+            self.x = 0
+        if self.x > 9700:
+            self.x = 9700
+        if self.y < 0:
+            self.y = 0
+        if self.y > 9700:
+            self.y = 9700
         return self.x, self.y
     
     def get_position(self):
