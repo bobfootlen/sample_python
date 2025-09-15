@@ -56,7 +56,7 @@ class Renderer:
             screen_x = p_x - camera_x
             screen_y = p_y - camera_y
             # Use the received face for remote players
-            sprite = self.asset_manager.get_sprite(face)
+            sprite = self.asset_manager.get_remote_sprite(face)
             self.screen.blit(sprite, (screen_x, screen_y))
 
     def update_display(self, x, y, fps, num_players):
