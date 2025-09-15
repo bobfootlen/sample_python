@@ -46,8 +46,7 @@ class Renderer:
         """Draw all remote players, adjusting for camera position"""
         for player_id, player_data in remote_players.items():
             # Exclude the local player (player_id 1)
-            if player_id == 1:
-                continue
+            ##continue
 
             p_x = player_data['x']
             p_y = player_data['y']
