@@ -72,6 +72,7 @@ class NetworkManager:
                             print(f"Malformed player data received: {line}")
                     buffer = ""
             except:
+                self.clients.remove(conn)
                 traceback.print_exc()
         conn.close()
 
