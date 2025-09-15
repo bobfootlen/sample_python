@@ -12,6 +12,8 @@ class NetworkManager:
         self.server = None
         self.client_mode = False
         self.local_players_ref = None # To hold reference to local players from Game
+        self.next_player_id = 1  # Initialize a counter for unique player IDs
+        self.conn_to_player_id = {} # Map connection objects to server-assigned player IDs
 
     def add_or_update_player(self, player_id, remote_addr, x, y, face):
         with self.players_lock:
@@ -48,46 +50,62 @@ class NetworkManager:
         conn, addr = self.server.accept()
         print("Connected by", addr)
         self.clients.append(conn)
+
+        # Assign a unique player ID to this connection
+        server_assigned_player_id = self.next_player_id
+        self.conn_to_player_id[conn] = server_assigned_player_id
+        self.next_player_id += 1
+        print(f"Assigned player ID {server_assigned_player_id} to {addr}")
+
         threading.Thread(target=self.handle_receive, args=(conn,), daemon=True).start()
 
     def handle_receive(self, conn):
         buffer = ""
         peer_addr = conn.getpeername()
+        # Retrieve the server-assigned player ID for this connection
+        server_assigned_player_id = self.conn_to_player_id.get(conn)
+
         while True:
             try:
                 data = conn.recv(1024)
                 if not data:
-                    print(f"Client {peer_addr} disconnected.")
+                    print(f"Client {peer_addr} (Player ID: {server_assigned_player_id}) disconnected.")
                     break
                 buffer += data.decode()
                 if '\n' in buffer:
                     lines = buffer.strip().split('\n')
                     for line in lines:
                         try:
-                            player_id_str, remote_x_str, remote_y_str, face = line.strip().split(",")
-                            player_id = int(player_id_str)
+                            # We still parse the client's data, but we will use our server-assigned ID
+                            client_sent_player_id_str, remote_x_str, remote_y_str, face = line.strip().split(",")
+                            # player_id = int(client_sent_player_id_str) # This line is no longer used for updating self.players
+
                             remote_x = int(remote_x_str)
                             remote_y = int(remote_y_str)
-                            self.add_or_update_player(player_id, f"{peer_addr[0]}:{peer_addr[1]}", remote_x, remote_y, face)
+                            # Use the server-assigned player_id to update the players dictionary
+                            self.add_or_update_player(server_assigned_player_id, f"{peer_addr[0]}:{peer_addr[1]}", remote_x, remote_y, face)
                         except ValueError:
-                            print(f"Malformed player data received: {line}")
+                            print(f"Malformed player data received from {peer_addr} (Player ID: {server_assigned_player_id}): {line}")
                     buffer = ""
             except:
-                pass
+                pass # This block handles other unexpected connection issues
         conn.close()
         # Remove client from self.clients
         if conn in self.clients:
             self.clients.remove(conn)
+        # Remove from conn_to_player_id as well
+        if conn in self.conn_to_player_id:
+            disconnected_player_id = self.conn_to_player_id[conn]
+            del self.conn_to_player_id[conn]
+        else:
+            disconnected_player_id = None # Should not happen if logic is correct
+
         # Remove player associated with this connection from self.players
-        player_to_remove = None
         with self.players_lock:
-            for player_id, player_data in self.players.items():
-                if player_data['addr'] == f"{peer_addr[0]}:{peer_addr[1]}":
-                    player_to_remove = player_id
-                    break
-            if player_to_remove:
-                del self.players[player_to_remove]
-                print(f"Removed player {player_to_remove} due to disconnect.")
+            if disconnected_player_id and disconnected_player_id in self.players:
+                del self.players[disconnected_player_id]
+                print(f"Removed player {disconnected_player_id} due to disconnect.")
+            # The previous logic that iterated through self.players based on addr is now redundant.
 
     def send_position(self, player_id, x, y, face):
         if self.client_mode and self.client:
@@ -124,13 +142,14 @@ class NetworkManager:
                     print(f"Error broadcasting to client {conn.getpeername()}: {e}")
             for conn in disconnected_clients:
                 self.clients.remove(conn)
-                # Find and remove the player associated with this disconnected client
-                player_to_remove = None
-                with self.players_lock:
-                    for player_id, player_data in self.players.items():
-                        if player_data['addr'] == f"{conn.getpeername()[0]}:{conn.getpeername()[1]}":
-                            player_to_remove = player_id
-                            break
-                    if player_to_remove:
-                        del self.players[player_to_remove]
-                        print(f"Removed player {player_to_remove} due to broadcast disconnect.")
+                # Remove from conn_to_player_id
+                if conn in self.conn_to_player_id:
+                    disconnected_player_id = self.conn_to_player_id[conn]
+                    del self.conn_to_player_id[conn]
+                    
+                    # Remove the player from self.players using the stored player_id
+                    with self.players_lock:
+                        if disconnected_player_id in self.players:
+                            del self.players[disconnected_player_id]
+                            print(f"Removed player {disconnected_player_id} due to broadcast disconnect.")
+

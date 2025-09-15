@@ -1,7 +1,8 @@
 import pygame
+from asset_manager import AssetManager
 
 class Renderer:
-    def __init__(self, screen, asset_manager):
+    def __init__(self, screen, asset_manager:AssetManager):
         self.screen = screen
         self.asset_manager = asset_manager
         self.bg_color = (50, 50, 50)
@@ -56,7 +57,7 @@ class Renderer:
             screen_x = p_x - camera_x
             screen_y = p_y - camera_y
             # Use the received face for remote players
-            sprite = self.asset_manager.get_remote_sprite(face)
+            sprite = self.asset_manager.get_remote_sprite(face, player_id)
             self.screen.blit(sprite, (screen_x, screen_y))
 
     def update_display(self, x, y, fps, num_players):
