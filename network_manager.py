@@ -42,20 +42,22 @@ class NetworkManager:
             while True:
                 self.accept_one()
 
-        def accept_one():
-            conn, addr = self.server.accept()
-            print("Connected by", addr)
-            self.clients.append(conn)
-            threading.Thread(target=self.handle_receive, args=(conn,), daemon=True).start()
+        threading.Thread(target=accept_loop, daemon=True).start()
 
-        threading.Thread(target=accept_one, daemon=True).start()
+    def accept_one(self):
+        conn, addr = self.server.accept()
+        print("Connected by", addr)
+        self.clients.append(conn)
+        threading.Thread(target=self.handle_receive, args=(conn,), daemon=True).start()
 
     def handle_receive(self, conn):
         buffer = ""
+        peer_addr = conn.getpeername()
         while True:
             try:
                 data = conn.recv(1024)
                 if not data:
+                    print(f"Client {peer_addr} disconnected.")
                     break
                 buffer += data.decode()
                 if '\n' in buffer:
@@ -66,15 +68,26 @@ class NetworkManager:
                             player_id = int(player_id_str)
                             remote_x = int(remote_x_str)
                             remote_y = int(remote_y_str)
-                            ip, port = conn.getpeername()
-                            self.add_or_update_player(player_id, f"{ip}:{port}", remote_x, remote_y, face)
+                            self.add_or_update_player(player_id, f"{peer_addr[0]}:{peer_addr[1]}", remote_x, remote_y, face)
                         except ValueError:
                             print(f"Malformed player data received: {line}")
                     buffer = ""
             except:
-                self.clients.remove(conn)
-                traceback.print_exc()
+                pass
         conn.close()
+        # Remove client from self.clients
+        if conn in self.clients:
+            self.clients.remove(conn)
+        # Remove player associated with this connection from self.players
+        player_to_remove = None
+        with self.players_lock:
+            for player_id, player_data in self.players.items():
+                if player_data['addr'] == f"{peer_addr[0]}:{peer_addr[1]}":
+                    player_to_remove = player_id
+                    break
+            if player_to_remove:
+                del self.players[player_to_remove]
+                print(f"Removed player {player_to_remove} due to disconnect.")
 
     def send_position(self, player_id, x, y, face):
         if self.client_mode and self.client:
@@ -100,8 +113,24 @@ class NetworkManager:
                     all_player_states.append(f"{player_id},{player_data['x']},{player_data['y']},{player_data['face']}")
 
             message = "\n" + "\n".join(all_player_states)
+            disconnected_clients = []
             for conn in self.clients:
                 try:
                     conn.sendall(message.encode())
+                except (BrokenPipeError, ConnectionResetError) as e:
+                    print(f"Client {conn.getpeername()} disconnected during broadcast: {e}")
+                    disconnected_clients.append(conn)
                 except Exception as e:
-                    print(f"Error broadcasting to client: {e}")
+                    print(f"Error broadcasting to client {conn.getpeername()}: {e}")
+            for conn in disconnected_clients:
+                self.clients.remove(conn)
+                # Find and remove the player associated with this disconnected client
+                player_to_remove = None
+                with self.players_lock:
+                    for player_id, player_data in self.players.items():
+                        if player_data['addr'] == f"{conn.getpeername()[0]}:{conn.getpeername()[1]}":
+                            player_to_remove = player_id
+                            break
+                    if player_to_remove:
+                        del self.players[player_to_remove]
+                        print(f"Removed player {player_to_remove} due to broadcast disconnect.")
