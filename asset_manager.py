@@ -18,7 +18,7 @@ class AssetManager:
         # Load remote player sprites
         self.sprites['remote_up'] = pygame.image.load('img/remote_up.png').convert_alpha()
         self.sprites['remote_down'] = pygame.image.load('img/remote_down.png').convert_alpha()
-        self.sprites['remote_left'] = pygame.image.load('img/rmote_left.png').convert_alpha()
+        self.sprites['remote_left'] = pygame.image.load('img/remote_left.png').convert_alpha()
         self.sprites['remote_right'] = pygame.image.load('img/remote_right.png').convert_alpha()
         
         # Load trees
