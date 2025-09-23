@@ -31,7 +31,9 @@ class NetworkManager:
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client.connect((host, self.port))
         print("Connected.")
+        threading.Thread(target=self.handle_receive_client, args=(self.client,), daemon=True).start()
         return True
+
 
     def handle_receive_client(self, conn):
         buffer = ""
