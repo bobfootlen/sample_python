@@ -33,6 +33,31 @@ class NetworkManager:
         print("Connected.")
         return True
 
+    def handle_receive_client(self, conn):
+        buffer = ""
+        while True:
+            try:
+                data = conn.recv(1024)
+                if not data:
+                    break
+                buffer += data.decode()
+                if '\n' in buffer:
+                    lines = buffer.strip().split('\n')
+                    for line in lines:
+                        try:
+                            client_sent_player_id_str, remote_x_str, remote_y_str, face = line.strip().split(",")
+                            remote_x = int(remote_x_str)
+                            remote_y = int(remote_y_str)
+                            self.add_or_update_player(client_sent_player_id_str, f"{conn.getpeername()[0]}:{conn.getpeername()[1]}", remote_x, remote_y, face)
+                        except ValueError:
+                            print(f"Malformed player data received from {conn.getpeername()}: {line}")
+                    buffer = ""
+            except:
+                pass
+        conn.close()
+        
+
+
     def setup_server(self):
         self.client_mode = False
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -57,9 +82,9 @@ class NetworkManager:
         self.next_player_id += 1
         print(f"Assigned player ID {server_assigned_player_id} to {addr}")
 
-        threading.Thread(target=self.handle_receive, args=(conn,), daemon=True).start()
+        threading.Thread(target=self.handle_receive_server, args=(conn,), daemon=True).start()
 
-    def handle_receive(self, conn):
+    def handle_receive_server(self, conn):
         buffer = ""
         peer_addr = conn.getpeername()
         # Retrieve the server-assigned player ID for this connection
