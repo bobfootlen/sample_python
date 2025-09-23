@@ -94,12 +94,12 @@ class Game:
         self.renderer.draw_background(self.camera_x, self.camera_y)
         self.renderer.draw_trees(self.camera_x, self.camera_y)
         
-        # Draw all local players
-        self.renderer.draw_players(self.players, self.camera_x, self.camera_y)
-        
         # Draw remote players
         remote_players = self.network_manager.get_players()
         self.renderer.draw_remote_players(remote_players, self.camera_x, self.camera_y)
+        
+        # Draw all local players
+        self.renderer.draw_players(self.players, self.camera_x, self.camera_y)
         
         # Update display
         fps = self.clock.get_fps()
@@ -115,7 +115,7 @@ class Game:
             self.network_manager.send_position(1, x, y, face)
         else:
             # Server mode - broadcast player info periodically
-            if self.frame % 10 == 0: # Broadcast every 10 frames
+            if self.frame % 1 == 0: # Broadcast every 10 frames
                 self.network_manager.broadcast_player_states()
             # Also print client info periodically
             if self.frame % 600 == 0:
