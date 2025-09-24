@@ -1,6 +1,6 @@
 import socket
 import threading
-import traceback
+import time
 
 class NetworkManager:
     def __init__(self, port=5000):
@@ -17,7 +17,7 @@ class NetworkManager:
 
     def add_or_update_player(self, player_id, remote_addr, x, y, face):
         with self.players_lock:
-            self.players[player_id] = {'addr': remote_addr, 'x': x, 'y': y, 'face': face}
+            self.players[player_id] = {'addr': remote_addr, 'x': x, 'y': y, 'face': face, 'last_seen': time.time()}
 
     def get_players(self):
         with self.players_lock:
@@ -45,19 +45,46 @@ class NetworkManager:
                 buffer += data.decode()
                 if '\n' in buffer:
                     lines = buffer.strip().split('\n')
+                    updated_players = []
                     for line in lines:
                         try:
                             client_sent_player_id_str, remote_x_str, remote_y_str, face = line.strip().split(",")
                             remote_x = int(remote_x_str)
                             remote_y = int(remote_y_str)
                             self.add_or_update_player(client_sent_player_id_str, f"{conn.getpeername()[0]}:{conn.getpeername()[1]}", remote_x, remote_y, face)
+                            updated_players.append(client_sent_player_id_str)
                         except ValueError:
                             print(f"Malformed player data received from {conn.getpeername()}: {line}")
                     buffer = ""
+                    self.purge_stale_players(updated_players)
             except:
                 pass
         conn.close()
         
+    def purge_stale_players(self, updated_players):
+        """
+        Remove players that are no longer active (not in the updated_players list).
+        Also remove players that haven't been seen for more than 10 seconds.
+        """
+        current_time = time.time()
+        stale_timeout = 10.0  # Remove players after 10 seconds of inactivity
+        
+        with self.players_lock:
+            # Create a list of players to remove to avoid modifying dict during iteration
+            players_to_remove = []
+            
+            for player_id, player_data in self.players.items():
+                # Check if player is not in the updated list (not recently active)
+                if player_id not in updated_players:
+                    # Check if player has been inactive for too long
+                    time_since_last_seen = current_time - player_data.get('last_seen', 0)
+                    if time_since_last_seen > stale_timeout:
+                        players_to_remove.append(player_id)
+                        print(f"Removing stale player {player_id} (inactive for {time_since_last_seen:.1f}s)")
+            
+            # Remove stale players
+            for player_id in players_to_remove:
+                del self.players[player_id]
 
 
     def setup_server(self):
