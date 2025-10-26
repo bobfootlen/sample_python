@@ -49,12 +49,10 @@ class Game:
         
         # Removed setup_networking from __init__
     
-    def setup_networking(self):
-        """Setup networking based on user input"""
-        remote = input("server address (press Enter for server mode): ")
-        if remote:
-            username = input("username: ")
-            self.network_manager.setup_client(remote, username)
+    def setup_networking(self, mode='server', server_address=None, username=None):
+        """Setup networking based on provided parameters"""
+        if mode == 'client' and server_address and username:
+            self.network_manager.setup_client(server_address, username)
         else:
             self.network_manager.setup_server()
     
@@ -145,5 +143,6 @@ class Game:
 
 if __name__ == "__main__":
     game = Game()
+    # setup_networking will be called from GUI or can be called manually
     game.setup_networking()
     game.run_game()
