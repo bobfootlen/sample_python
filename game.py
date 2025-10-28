@@ -8,6 +8,9 @@ class Game:
     def __init__(self):
         pygame.init()
         
+        # Initialize Pygame mixer for music
+        pygame.mixer.init()
+        
         # Screen setup
         self.SCREEN_WIDTH = 500
         self.SCREEN_HEIGHT = 500
@@ -47,7 +50,18 @@ class Game:
         self.camera_x = 0
         self.camera_y = 0
         
+        # Load and start background music
+        self.setup_music()
+        
         # Removed setup_networking from __init__
+    
+    def setup_music(self):
+        """Setup background music"""
+        try:
+            pygame.mixer.music.load("Sample_Python/BeepBox.mp3")
+            pygame.mixer.music.play(-1)  # -1 means loop indefinitely
+        except pygame.error:
+            print("Error loading music file - continuing without music")
     
     def setup_networking(self, mode='server', server_address=None, username=None):
         """Setup networking based on provided parameters"""
@@ -91,6 +105,7 @@ class Game:
         # Draw background and trees
         self.renderer.draw_background(self.camera_x, self.camera_y)
         self.renderer.draw_trees(self.camera_x, self.camera_y)
+        self.renderer.draw_blocks(self.camera_x, self.camera_y)
         
         # Draw remote players
         remote_players = self.network_manager.get_players()
@@ -139,6 +154,8 @@ class Game:
             
             self.frame += 1
         
+        # Stop music before quitting
+        pygame.mixer.music.stop()
         pygame.quit()
 
 if __name__ == "__main__":

@@ -5,6 +5,7 @@ class AssetManager:
         self.sprites = {}
         self.backgrounds = {}
         self.trees = {}
+        self.blocks = {}
         self.load_assets()
     
     def load_assets(self):
@@ -24,6 +25,9 @@ class AssetManager:
         # Load trees
         self.trees['tree_1'] = pygame.image.load('img/tree-1.png').convert_alpha()
         self.trees['tree_2'] = pygame.image.load('img/tree-2.png').convert_alpha()
+
+        # load blocks
+        self.blocks['block1'] = pygame.image.load('img/block1.png').convert_alpha()
         
         # Load background
         self.backgrounds['main'] = pygame.image.load('img/backround1.png').convert_alpha()
@@ -40,6 +44,10 @@ class AssetManager:
     def get_tree(self, tree_name):
         """Get tree sprite by name"""
         return self.trees.get(tree_name)
+
+    def get_blocks(self, block_name):
+        """Get block sprite by name"""
+        return self.blocks.get(block_name)
     
     def get_background(self, background_name='main'):
         """Get background by name"""

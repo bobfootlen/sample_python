@@ -5,7 +5,7 @@ pygame.mixer.init()
 
 # Load the MP3 file
 try:
-    pygame.mixer.music.load("BeepBox.mp3")  # Replace with your file path
+    pygame.mixer.music.load("Sample_Python/BeepBox.mp3")  # Replace with your file path
 except pygame.error:
     print("Error loading music file")
     exit()

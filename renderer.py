@@ -26,6 +26,13 @@ class Renderer:
         self.screen.blit(tree_1, (300 - camera_x, 300 - camera_y))
         self.screen.blit(tree_2, (100 - camera_x, 100 - camera_y))
 
+    def draw_blocks(self, camera_x, camera_y):
+        """Draw blocks at given coordinates, offset by camera"""
+        block1 = self.asset_manager.get_blocks('block1')
+
+        # Adjust block position by camera offset
+        self.screen.blit(block1, (100 - camera_x, 100 - camera_y))
+
     def draw_player(self, player, camera_x, camera_y):
         """Draw a local player relative to the camera"""
         face = player.get_facing()
