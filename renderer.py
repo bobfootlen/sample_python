@@ -54,7 +54,7 @@ class Renderer:
         if players:
             self.draw_player(players[0], camera_x, camera_y)
 
-    def draw_remote_players(self, remote_players, camera_x, camera_y):
+    def draw_remote_players(self, player_name, remote_players, camera_x, camera_y):
         """Draw all remote players, adjusting for camera position"""
         for player_id, player_data in remote_players.items():
             # Exclude the local player (player_id 1)
@@ -63,8 +63,10 @@ class Renderer:
             p_x = player_data['x']
             p_y = player_data['y']
             face = player_data['face']
-            player_name = player_data.get('name', f'Player {player_id}')
-            
+            remote_player_name = player_data.get('name', f'Player {player_id}')
+            if(remote_player_name == player_name):  
+                continue
+
             # Calculate screen coordinates relative to camera
             screen_x = p_x - camera_x
             screen_y = p_y - camera_y
@@ -73,7 +75,7 @@ class Renderer:
             self.screen.blit(sprite, (screen_x, screen_y))
             
             # Draw player name above the remote player
-            self.draw_player_name(player_name, screen_x, screen_y)
+            self.draw_player_name(remote_player_name, screen_x, screen_y)
 
     def draw_player_name(self, name, x, y):
         """Draw player name above the player sprite"""

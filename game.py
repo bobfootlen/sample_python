@@ -116,7 +116,7 @@ class Game:
         
         # Draw remote players
         remote_players = self.network_manager.get_players()
-        self.renderer.draw_remote_players(remote_players, self.camera_x, self.camera_y)
+        self.renderer.draw_remote_players(self.player_name,remote_players, self.camera_x, self.camera_y)
         
         # Draw all local players
         self.renderer.draw_players(self.players, self.camera_x, self.camera_y)
