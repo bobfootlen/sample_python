@@ -15,9 +15,17 @@ class NetworkManager:
         self.next_player_id = 1  # Initialize a counter for unique player IDs
         self.conn_to_player_id = {} # Map connection objects to server-assigned player IDs
 
-    def add_or_update_player(self, player_id, remote_addr, x, y, face):
+    def add_or_update_player(self, player_id, remote_addr, x, y, face, name=None):
         with self.players_lock:
-            self.players[player_id] = {'addr': remote_addr, 'x': x, 'y': y, 'face': face, 'last_seen': time.time()}
+            if player_id in self.players:
+                # Update existing player, preserve name if not provided
+                if name is None:
+                    name = self.players[player_id].get('name', f'Player {player_id}')
+            else:
+                # New player, use provided name or default
+                if name is None:
+                    name = f'Player {player_id}'
+            self.players[player_id] = {'addr': remote_addr, 'x': x, 'y': y, 'face': face, 'name': name, 'last_seen': time.time()}
 
     def get_players(self):
         with self.players_lock:
@@ -28,9 +36,12 @@ class NetworkManager:
 
     def setup_client(self, host, username):
         self.client_mode = True
+        self.client_username = username
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client.connect((host, self.port))
         print("Connected.")
+        # Send username to server
+        self.client.sendall(f"USERNAME:{username}\n".encode())
         threading.Thread(target=self.handle_receive_client, args=(self.client,), daemon=True).start()
         return True
 
@@ -48,11 +59,19 @@ class NetworkManager:
                     updated_players = []
                     for line in lines:
                         try:
-                            client_sent_player_id_str, remote_x_str, remote_y_str, face = line.strip().split(",")
-                            remote_x = int(remote_x_str)
-                            remote_y = int(remote_y_str)
-                            self.add_or_update_player(client_sent_player_id_str, f"{conn.getpeername()[0]}:{conn.getpeername()[1]}", remote_x, remote_y, face)
-                            updated_players.append(client_sent_player_id_str)
+                            # Handle player data: player_id,x,y,face,name
+                            parts = line.strip().split(",")
+                            if len(parts) >= 4:
+                                client_sent_player_id_str = parts[0]
+                                remote_x_str = parts[1]
+                                remote_y_str = parts[2]
+                                face = parts[3]
+                                name = parts[4] if len(parts) > 4 else None
+                                
+                                remote_x = int(remote_x_str)
+                                remote_y = int(remote_y_str)
+                                self.add_or_update_player(client_sent_player_id_str, f"{conn.getpeername()[0]}:{conn.getpeername()[1]}", remote_x, remote_y, face, name)
+                                updated_players.append(client_sent_player_id_str)
                         except ValueError:
                             print(f"Malformed player data received from {conn.getpeername()}: {line}")
                     buffer = ""
@@ -110,6 +129,11 @@ class NetworkManager:
         self.conn_to_player_id[conn] = server_assigned_player_id
         self.next_player_id += 1
         print(f"Assigned player ID {server_assigned_player_id} to {addr}")
+        
+        # Store username for this connection
+        if not hasattr(self, 'conn_to_username'):
+            self.conn_to_username = {}
+        self.conn_to_username[conn] = f'Player {server_assigned_player_id}'  # Default name
 
         threading.Thread(target=self.handle_receive_server, args=(conn,), daemon=True).start()
 
@@ -118,6 +142,8 @@ class NetworkManager:
         peer_addr = conn.getpeername()
         # Retrieve the server-assigned player ID for this connection
         server_assigned_player_id = self.conn_to_player_id.get(conn)
+        if not hasattr(self, 'conn_to_username'):
+            self.conn_to_username = {}
 
         while True:
             try:
@@ -130,14 +156,27 @@ class NetworkManager:
                     lines = buffer.strip().split('\n')
                     for line in lines:
                         try:
+                            # Check if this is a username message
+                            if line.startswith("USERNAME:"):
+                                username = line.replace("USERNAME:", "").strip()
+                                self.conn_to_username[conn] = username
+                                print(f"Client {peer_addr} (Player ID: {server_assigned_player_id}) set username to: {username}")
+                                continue
+                            
                             # We still parse the client's data, but we will use our server-assigned ID
-                            client_sent_player_id_str, remote_x_str, remote_y_str, face = line.strip().split(",")
-                            # player_id = int(client_sent_player_id_str) # This line is no longer used for updating self.players
+                            parts = line.strip().split(",")
+                            if len(parts) >= 4:
+                                client_sent_player_id_str = parts[0]
+                                remote_x_str = parts[1]
+                                remote_y_str = parts[2]
+                                face = parts[3]
 
-                            remote_x = int(remote_x_str)
-                            remote_y = int(remote_y_str)
-                            # Use the server-assigned player_id to update the players dictionary
-                            self.add_or_update_player(server_assigned_player_id, f"{peer_addr[0]}:{peer_addr[1]}", remote_x, remote_y, face)
+                                remote_x = int(remote_x_str)
+                                remote_y = int(remote_y_str)
+                                # Get username for this connection
+                                username = self.conn_to_username.get(conn, f'Player {server_assigned_player_id}')
+                                # Use the server-assigned player_id to update the players dictionary
+                                self.add_or_update_player(server_assigned_player_id, f"{peer_addr[0]}:{peer_addr[1]}", remote_x, remote_y, face, username)
                         except ValueError:
                             print(f"Malformed player data received from {peer_addr} (Player ID: {server_assigned_player_id}): {line}")
                     buffer = ""
@@ -153,6 +192,10 @@ class NetworkManager:
             del self.conn_to_player_id[conn]
         else:
             disconnected_player_id = None # Should not happen if logic is correct
+        
+        # Remove from conn_to_username
+        if hasattr(self, 'conn_to_username') and conn in self.conn_to_username:
+            del self.conn_to_username[conn]
 
         # Remove player associated with this connection from self.players
         with self.players_lock:
@@ -163,7 +206,8 @@ class NetworkManager:
 
     def send_position(self, player_id, x, y, face):
         if self.client_mode and self.client:
-            self.client.sendall(f"\n{player_id},{x},{y},{face}".encode())
+            username = getattr(self, 'client_username', f'Player {player_id}')
+            self.client.sendall(f"\n{player_id},{x},{y},{face},{username}".encode())
 
     def is_client_mode(self):
         return self.client_mode
@@ -177,12 +221,14 @@ class NetworkManager:
             # Add local players' states
             if self.local_players_ref:
                 for player in self.local_players_ref:
-                    all_player_states.append(f"{player.player_id},{player.x},{player.y},{player.face}")
+                    player_name = getattr(player, 'name', f'Player {player.player_id}')
+                    all_player_states.append(f"{player.player_id},{player.x},{player.y},{player.face},{player_name}")
 
             # Add remote players' states (which server already knows)
             with self.players_lock:
                 for player_id, player_data in self.players.items():
-                    all_player_states.append(f"{player_id},{player_data['x']},{player_data['y']},{player_data['face']}")
+                    player_name = player_data.get('name', f'Player {player_id}')
+                    all_player_states.append(f"{player_id},{player_data['x']},{player_data['y']},{player_data['face']},{player_name}")
 
             message = "\n" + "\n".join(all_player_states)
             disconnected_clients = []
@@ -200,6 +246,10 @@ class NetworkManager:
                 if conn in self.conn_to_player_id:
                     disconnected_player_id = self.conn_to_player_id[conn]
                     del self.conn_to_player_id[conn]
+                    
+                    # Remove from conn_to_username
+                    if hasattr(self, 'conn_to_username') and conn in self.conn_to_username:
+                        del self.conn_to_username[conn]
                     
                     # Remove the player from self.players using the stored player_id
                     with self.players_lock:

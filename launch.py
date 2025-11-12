@@ -41,7 +41,7 @@ server_address_input = pygame_gui.elements.UITextEntryLine(
     placeholder_text='Enter server address (e.g., localhost:5000)'
 )
 
-# Create username input (only visible in client mode)
+# Create username input (visible in both server and client mode)
 username_input = pygame_gui.elements.UITextEntryLine(
     relative_rect=pygame.Rect((200, 280), (400, 30)),
     manager=manager,
@@ -58,23 +58,26 @@ start_button = pygame_gui.elements.UIButton(
 # Mode selection state
 selected_mode = None
 server_address_input.hide()
-username_input.hide()
+username_input.show()  # Show username input by default for server mode
 
 running = True
 clock = pygame.time.Clock()
 
 def start_game():
     """Start the game with selected mode and parameters"""
+    username = username_input.get_text()
+    if not username:
+        username = "Player"  # Default name if not provided
+    
     if selected_mode == 'server':
         # Start server mode
         from game import Game
         game = Game()
-        game.setup_networking(mode='server')
+        game.setup_networking(mode='server', username=username)
         game.run_game()
     elif selected_mode == 'client':
         # Start client mode
         server_address = server_address_input.get_text()
-        username = username_input.get_text()
         if server_address and username:
             from game import Game
             game = Game()
@@ -94,7 +97,7 @@ while running:
             if event.ui_element == server_radio:
                 selected_mode = 'server'
                 server_address_input.hide()
-                username_input.hide()
+                username_input.show()  # Show username input for server mode
                 server_radio.set_text('✓ Server Mode')
                 client_radio.set_text('Client Mode')
                 

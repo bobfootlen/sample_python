@@ -33,8 +33,9 @@ class Game:
             'speed_0': pygame.K_0
         }
 
+        self.player_name = "Player"  # Default name, will be set by setup_networking
         self.players = [
-            Player(x=200, y=200, speed=5)
+            Player(x=200, y=200, speed=5, name=self.player_name)
         ]
         self.network_manager.set_local_players_ref(self.players)
         
@@ -65,6 +66,12 @@ class Game:
     
     def setup_networking(self, mode='server', server_address=None, username=None):
         """Setup networking based on provided parameters"""
+        if username:
+            self.player_name = username
+            # Update the player's name
+            if self.players:
+                self.players[0].name = username
+        
         if mode == 'client' and server_address and username:
             self.network_manager.setup_client(server_address, username)
         else:

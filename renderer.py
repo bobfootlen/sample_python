@@ -42,6 +42,10 @@ class Renderer:
         screen_y = self.screen.get_height() // 2
 
         self.screen.blit(sprite, (screen_x, screen_y))
+        
+        # Draw player name above the player
+        player_name = getattr(player, 'name', 'Player')
+        self.draw_player_name(player_name, screen_x, screen_y)
 
     def draw_players(self, players, camera_x, camera_y):
         """Draw all local players"""
@@ -59,6 +63,7 @@ class Renderer:
             p_x = player_data['x']
             p_y = player_data['y']
             face = player_data['face']
+            player_name = player_data.get('name', f'Player {player_id}')
             
             # Calculate screen coordinates relative to camera
             screen_x = p_x - camera_x
@@ -66,7 +71,26 @@ class Renderer:
             # Use the received face for remote players
             sprite = self.asset_manager.get_remote_sprite(face)
             self.screen.blit(sprite, (screen_x, screen_y))
+            
+            # Draw player name above the remote player
+            self.draw_player_name(player_name, screen_x, screen_y)
 
+    def draw_player_name(self, name, x, y):
+        """Draw player name above the player sprite"""
+        font = pygame.font.Font(None, 24)
+        text_surface = font.render(name, True, (255, 255, 255))
+        text_rect = text_surface.get_rect()
+        # Center the text above the player (assuming sprite is roughly 32x32)
+        text_x = x + 16 - text_rect.width // 2
+        text_y = y - 20  # Position above the sprite
+        # Draw a semi-transparent background for better readability
+        bg_rect = pygame.Rect(text_x - 2, text_y - 2, text_rect.width + 4, text_rect.height + 4)
+        bg_surface = pygame.Surface((bg_rect.width, bg_rect.height))
+        bg_surface.set_alpha(180)
+        bg_surface.fill((0, 0, 0))
+        self.screen.blit(bg_surface, bg_rect)
+        self.screen.blit(text_surface, (text_x, text_y))
+    
     def update_display(self, x, y, fps, num_players):
         """Update the display caption with current info"""
         pygame.display.set_caption(f"python game: cam_x: {x} cam_y: {y} fps: {fps:.2f} players: {num_players}")

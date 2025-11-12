@@ -1,12 +1,13 @@
 import pygame
 
 class Player:
-    def __init__(self, x=200, y=200, speed=5, player_id="host"):
+    def __init__(self, x=200, y=200, speed=5, player_id="host", name="Player"):
         self.x = x
         self.y = y
         self.speed = speed
         self.face = "none"
         self.player_id = player_id
+        self.name = name
 
     def handle_speed_input(self, keys):
         """Handle speed changes based on key input"""
