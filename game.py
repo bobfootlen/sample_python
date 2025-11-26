@@ -120,6 +120,8 @@ class Game:
         
         # Draw all local players
         self.renderer.draw_players(self.players, self.camera_x, self.camera_y)
+
+        self.renderer.draw_blocks(self.camera_x, self.camera_y)
         
         # Update display
         fps = self.clock.get_fps()
