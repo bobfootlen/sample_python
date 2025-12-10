@@ -27,7 +27,19 @@ class AssetManager:
         self.trees['tree_2'] = pygame.image.load('img/tree-2.png').convert_alpha()
 
         # load blocks
-        self.blocks['block1'] = pygame.image.load('img/block1.png').convert_alpha()
+        # Try to load block_1.png first, fallback to block1.png
+        try:
+            self.blocks['block_1'] = pygame.image.load('img/block_1.png').convert_alpha()
+        except:
+            try:
+                self.blocks['block_1'] = pygame.image.load('img/block1.png').convert_alpha()
+            except:
+                print("Warning: Could not load block_1.png or block1.png")
+        # Also keep block1 for backwards compatibility
+        try:
+            self.blocks['block1'] = pygame.image.load('img/block1.png').convert_alpha()
+        except:
+            pass
         
         # Load background
         self.backgrounds['main'] = pygame.image.load('img/backround1.png').convert_alpha()

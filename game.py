@@ -51,6 +51,16 @@ class Game:
         self.camera_x = 0
         self.camera_y = 0
         
+        # Block storage - list of dictionaries with 'x' and 'y' positions
+        self.placed_blocks = []
+        
+        # Grid size for block alignment
+        self.GRID_SIZE = 100
+        
+        # Track key states to prevent continuous placement/destruction
+        self.space_pressed = False
+        self.q_pressed = False
+        
         # Load and start background music
         self.setup_music()
         
@@ -82,6 +92,16 @@ class Game:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.run = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    self.space_pressed = True
+                elif event.key == pygame.K_q:
+                    self.q_pressed = True
+            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_SPACE:
+                    self.space_pressed = False
+                elif event.key == pygame.K_q:
+                    self.q_pressed = False
     
     def update(self):
         """Update game state"""
@@ -91,18 +111,90 @@ class Game:
         # Update all players
         for player in self.players:
             # Handle player movement
-            face, x, y = player.handle_movement(keys)
+            player.handle_movement(keys)
             
             # Handle speed changes
             player.handle_speed_input(keys)
             
             # Handle wall boundaries
             player.handle_walls()
+            
+            # Handle block placement (space key)
+            if self.space_pressed:
+                self.place_block(player)
+                self.space_pressed = False  # Reset to prevent continuous placement
+            
+            # Handle block destruction (q key)
+            if self.q_pressed:
+                self.destroy_block(player)
+                self.q_pressed = False  # Reset to prevent continuous destruction
         
         # Camera follows player 1, keeping player 1 centered
         player1_x, player1_y = self.players[0].get_position()
         self.camera_x = player1_x - self.screen_center_x
         self.camera_y = player1_y - self.screen_center_y
+    
+    def place_block(self, player):
+        """Place a block in front of the player, aligned to grid"""
+        # Get player position and facing direction
+        player_x, player_y = player.get_position()
+        face = player.get_facing()
+        
+        # Calculate position in front of player based on facing direction
+        # Assuming player sprite is roughly 32x32, place block one grid cell away
+        block_x = player_x
+        block_y = player_y
+        
+        if face == "up":
+            block_y -= self.GRID_SIZE
+        elif face == "down":
+            block_y += self.GRID_SIZE
+        elif face == "left":
+            block_x -= self.GRID_SIZE
+        elif face == "right":
+            block_x += self.GRID_SIZE
+        else:
+            # Default to down if no facing direction
+            block_y += self.GRID_SIZE
+        
+        # Align to grid
+        block_x = (block_x // self.GRID_SIZE) * self.GRID_SIZE
+        block_y = (block_y // self.GRID_SIZE) * self.GRID_SIZE
+        
+        # Check if block already exists at this position
+        block_pos = (block_x, block_y)
+        if block_pos not in [(b['x'], b['y']) for b in self.placed_blocks]:
+            self.placed_blocks.append({'x': block_x, 'y': block_y})
+    
+    def destroy_block(self, player):
+        """Destroy the block the player is facing"""
+        # Get player position and facing direction
+        player_x, player_y = player.get_position()
+        face = player.get_facing()
+        
+        # Calculate position in front of player
+        block_x = player_x
+        block_y = player_y
+        
+        if face == "up":
+            block_y -= self.GRID_SIZE
+        elif face == "down":
+            block_y += self.GRID_SIZE
+        elif face == "left":
+            block_x -= self.GRID_SIZE
+        elif face == "right":
+            block_x += self.GRID_SIZE
+        else:
+            # Default to down if no facing direction
+            block_y += self.GRID_SIZE
+        
+        # Align to grid
+        block_x = (block_x // self.GRID_SIZE) * self.GRID_SIZE
+        block_y = (block_y // self.GRID_SIZE) * self.GRID_SIZE
+        
+        # Remove block at this position if it exists
+        block_pos = (block_x, block_y)
+        self.placed_blocks = [b for b in self.placed_blocks if (b['x'], b['y']) != block_pos]
     
     def render(self):
         """Render the game"""
@@ -112,7 +204,9 @@ class Game:
         # Draw background and trees
         self.renderer.draw_background(self.camera_x, self.camera_y)
         self.renderer.draw_trees(self.camera_x, self.camera_y)
-        self.renderer.draw_blocks(self.camera_x, self.camera_y)
+        
+        # Draw placed blocks
+        self.renderer.draw_blocks(self.placed_blocks, self.camera_x, self.camera_y)
         
         # Draw remote players
         remote_players = self.network_manager.get_players()
@@ -120,8 +214,6 @@ class Game:
         
         # Draw all local players
         self.renderer.draw_players(self.players, self.camera_x, self.camera_y)
-
-        self.renderer.draw_blocks(self.camera_x, self.camera_y)
         
         # Update display
         fps = self.clock.get_fps()

@@ -33,9 +33,7 @@ class Player:
         if keys[pygame.K_s]:
             self.y += self.speed
             self.face = "down"
-        
-        return self.face, self.x, self.y
-    
+
     def handle_walls(self):
         """Handle wall boundaries"""
         if self.x < 0:
