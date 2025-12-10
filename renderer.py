@@ -29,9 +29,8 @@ class Renderer:
     def draw_blocks(self, camera_x, camera_y):
         """Draw blocks at given coordinates, offset by camera"""
         block1 = self.asset_manager.get_blocks('block1')
-
-        # Adjust block position by camera offset
-        self.screen.blit(block1, (100 - camera_x, 100 - camera_y))
+        for block in self.asset_manager.get_blocks():
+            self.screen.blit(block, (block.x - camera_x, block.y - camera_y))
 
     def draw_player(self, player, camera_x, camera_y):
         """Draw a local player relative to the camera"""
@@ -41,7 +40,7 @@ class Renderer:
         screen_x = self.screen.get_width() // 2
         screen_y = self.screen.get_height() // 2
 
-        self.screen.blit(sprite, (screen_x, screen_y))
+        self.screen.blit(sprite, (screen_x, screen_y)) 
         
         # Draw player name above the player
         player_name = getattr(player, 'name', 'Player')

@@ -46,6 +46,9 @@ ASSET_PATHS = {
     },
     'backgrounds': {
         'main': 'img/backround1.png'
+    },
+    'blocks' : {
+        'main': 'img/block1.png'
     }
 }
 

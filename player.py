@@ -18,7 +18,7 @@ class Player:
         if keys[pygame.K_0]:
             self.speed = 20
         return self.speed
-
+        
     def handle_movement(self, keys):
         """Handle movement based on key input"""
         if keys[pygame.K_a]:
