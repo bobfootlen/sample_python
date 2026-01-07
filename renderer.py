@@ -34,7 +34,7 @@ class Renderer:
             block_image = self.asset_manager.get_blocks('block1')
         for block in placed_blocks:
             if block_image:
-                self.screen.blit(block_image, (block['x'] - camera_x, block['y'] - camera_y))
+                self.screen.blit(block_image, (block.x - camera_x, block.y - camera_y))
 
     def draw_player(self, player, camera_x, camera_y):
         """Draw a local player relative to the camera"""

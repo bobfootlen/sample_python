@@ -1,3 +1,4 @@
+from typing import List
 import pygame
 from network_manager import NetworkManager
 from asset_manager import AssetManager
@@ -52,7 +53,7 @@ class Game:
         self.camera_y = 0
         
         # Block storage - list of dictionaries with 'x' and 'y' positions
-        self.placed_blocks = []
+        self.placed_blocks: List[Block] = []
         
         # Grid size for block alignment
         self.GRID_SIZE = 100
@@ -146,13 +147,17 @@ class Game:
         block_y = player_y
         
         if face == "up":
-            block_y -= self.GRID_SIZE
+            block_y -= self.GRID_SIZE // 2
+            block_x += self.GRID_SIZE // 2
         elif face == "down":
-            block_y += self.GRID_SIZE
+            block_y += self.GRID_SIZE+self.GRID_SIZE // 2
+            block_x += self.GRID_SIZE // 2
         elif face == "left":
-            block_x -= self.GRID_SIZE
+            block_x -= self.GRID_SIZE // 2
+            block_y += self.GRID_SIZE // 2
         elif face == "right":
-            block_x += self.GRID_SIZE
+            block_x += self.GRID_SIZE + self.GRID_SIZE // 2
+            block_y += self.GRID_SIZE // 2
         else:
             # Default to down if no facing direction
             block_y += self.GRID_SIZE
@@ -163,8 +168,8 @@ class Game:
         
         # Check if block already exists at this position
         block_pos = (block_x, block_y)
-        if block_pos not in [(b['x'], b['y']) for b in self.placed_blocks]:
-            self.placed_blocks.append({'x': block_x, 'y': block_y})
+        if block_pos not in [(b.x, b.y) for b in self.placed_blocks]:
+            self.placed_blocks.append(Block(block_x, block_y))
     
     def destroy_block(self, player):
         """Destroy the block the player is facing"""
@@ -194,7 +199,7 @@ class Game:
         
         # Remove block at this position if it exists
         block_pos = (block_x, block_y)
-        self.placed_blocks = [b for b in self.placed_blocks if (b['x'], b['y']) != block_pos]
+        self.placed_blocks = [b for b in  self.placed_blocks if (b.x, b.y) != block_pos]
     
     def render(self):
         """Render the game"""
@@ -258,6 +263,19 @@ class Game:
         # Stop music before quitting
         pygame.mixer.music.stop()
         pygame.quit()
+
+class Block:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.hp = 10
+        self.max_hp = 10
+        self.block_type = "stone"
+        self.block_image = pygame.image.load("img/block1.png")
+        #self.block_image_broken = pygame.image.load("img/block_1_broken.png")
+        #self.block_image_destroyed = pygame.image.load("img/block_1_destroyed.png")
+        #self.block_image_destroyed_broken = pygame.image.load("img/block_1_destroyed_broken.png")
+        #self.block_image_destroyed_broken_destroyed = pygame.image.load("img/block_1_destroyed_broken_destroyed.png")
 
 if __name__ == "__main__":
     game = Game()
