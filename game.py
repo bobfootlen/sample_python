@@ -137,34 +137,9 @@ class Game:
     
     def place_block(self, player):
         """Place a block in front of the player, aligned to grid"""
-        # Get player position and facing direction
-        player_x, player_y = player.get_position()
-        face = player.get_facing()
         
-        # Calculate position in front of player based on facing direction
-        # Assuming player sprite is roughly 32x32, place block one grid cell away
-        block_x = player_x
-        block_y = player_y
-        
-        if face == "up":
-            block_y -= self.GRID_SIZE // 2
-            block_x += self.GRID_SIZE // 2
-        elif face == "down":
-            block_y += self.GRID_SIZE+self.GRID_SIZE // 2
-            block_x += self.GRID_SIZE // 2
-        elif face == "left":
-            block_x -= self.GRID_SIZE // 2
-            block_y += self.GRID_SIZE // 2
-        elif face == "right":
-            block_x += self.GRID_SIZE + self.GRID_SIZE // 2
-            block_y += self.GRID_SIZE // 2
-        else:
-            # Default to down if no facing direction
-            block_y += self.GRID_SIZE
-        
-        # Align to grid
-        block_x = (block_x // self.GRID_SIZE) * self.GRID_SIZE
-        block_y = (block_y // self.GRID_SIZE) * self.GRID_SIZE
+        # Get the position of the block the player is facing
+        block_x, block_y = player.get_facing_block_position(self.GRID_SIZE)
         
         # Check if block already exists at this position
         block_pos = (block_x, block_y)
@@ -173,33 +148,10 @@ class Game:
     
     def destroy_block(self, player):
         """Destroy the block the player is facing"""
-        # Get player position and facing direction
-        player_x, player_y = player.get_position()
-        face = player.get_facing()
-        
-        # Calculate position in front of player
-        block_x = player_x
-        block_y = player_y
-        
-        if face == "up":
-            block_y -= self.GRID_SIZE
-        elif face == "down":
-            block_y += self.GRID_SIZE
-        elif face == "left":
-            block_x -= self.GRID_SIZE
-        elif face == "right":
-            block_x += self.GRID_SIZE
-        else:
-            # Default to down if no facing direction
-            block_y += self.GRID_SIZE
-        
-        # Align to grid
-        block_x = (block_x // self.GRID_SIZE) * self.GRID_SIZE
-        block_y = (block_y // self.GRID_SIZE) * self.GRID_SIZE
-        
+        # Get the position of the block the player is facing
+        block_x, block_y = player.get_facing_block_position(self.GRID_SIZE)
         # Remove block at this position if it exists
-        block_pos = (block_x, block_y)
-        self.placed_blocks = [b for b in  self.placed_blocks if (b.x, b.y) != block_pos]
+        self.placed_blocks = [b for b in  self.placed_blocks if (b.x, b.y) != (block_x, block_y)]
     
     def render(self):
         """Render the game"""

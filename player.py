@@ -45,6 +45,32 @@ class Player:
         if self.y > 9900:
             self.y = 9900
         return self.x, self.y
+
+    def get_facing_block_position(self, GRID_SIZE):
+        face = self.face
+        block_x = self.x
+        block_y = self.y
+        
+        if face == "up":
+            block_y -= GRID_SIZE // 2
+            block_x += GRID_SIZE // 2
+        elif face == "down":
+            block_y += GRID_SIZE+GRID_SIZE // 2
+            block_x += GRID_SIZE // 2
+        elif face == "left":
+            block_x -= GRID_SIZE // 2
+            block_y += GRID_SIZE // 2
+        elif face == "right":
+            block_x += GRID_SIZE + GRID_SIZE // 2
+            block_y += GRID_SIZE // 2
+        else:
+            # Default to down if no facing direction
+            block_y += GRID_SIZE
+        
+        # Align to grid
+        block_x = (block_x // GRID_SIZE) * GRID_SIZE
+        block_y = (block_y // GRID_SIZE) * GRID_SIZE
+        return block_x, block_y
     
     def get_position(self):
         """Get current position"""
