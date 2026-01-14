@@ -26,6 +26,9 @@ class AssetManager:
         self.trees['tree_1'] = pygame.image.load('img/tree-1.png').convert_alpha()
         self.trees['tree_2'] = pygame.image.load('img/tree-2.png').convert_alpha()
 
+        # ui sprites
+        self.sprites['cursor'] = pygame.image.load('img/cursor.png').convert_alpha()
+
         # load blocks
         # Try to load block_1.png first, fallback to block1.png
         try:
