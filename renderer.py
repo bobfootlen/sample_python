@@ -36,16 +36,17 @@ class Renderer:
             if block_image:
                 self.screen.blit(block_image, (block.x - camera_x, block.y - camera_y))
 
-    def draw_player(self, player, camera_x, camera_y):
+    def draw_player(self, player):
         """Draw a local player relative to the camera"""
         face = player.get_facing()
         sprite = self.asset_manager.get_sprite(face)
+        cursor = self.asset_manager.get_cursor(face)
         # The local player being followed by camera is drawn at screen center
         screen_x = self.screen.get_width() // 2
         screen_y = self.screen.get_height() // 2
 
         self.screen.blit(sprite, (screen_x, screen_y)) 
-        
+        self.screen.blit(cursor, (screen_x, screen_y))
         # Draw player name above the player
         player_name = getattr(player, 'name', 'Player')
         self.draw_player_name(player_name, screen_x, screen_y)
@@ -55,7 +56,8 @@ class Renderer:
         # There's only one local player, so we draw it directly.
         # This method is kept for consistency with how it's called in game.py
         if players:
-            self.draw_player(players[0], camera_x, camera_y)
+            self.draw_player(players[0])
+
 
     def draw_remote_players(self, player_name, remote_players, camera_x, camera_y):
         """Draw all remote players, adjusting for camera position"""

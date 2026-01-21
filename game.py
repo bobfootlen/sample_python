@@ -135,7 +135,7 @@ class Game:
         self.camera_x = player1_x - self.screen_center_x
         self.camera_y = player1_y - self.screen_center_y
     
-    def place_block(self, player):
+    def place_block(self, player: Player):
         """Place a block in front of the player, aligned to grid"""
         
         # Get the position of the block the player is facing
@@ -146,7 +146,7 @@ class Game:
         if block_pos not in [(b.x, b.y) for b in self.placed_blocks]:
             self.placed_blocks.append(Block(block_x, block_y))
     
-    def destroy_block(self, player):
+    def destroy_block(self, player: Player):
         """Destroy the block the player is facing"""
         # Get the position of the block the player is facing
         block_x, block_y = player.get_facing_block_position(self.GRID_SIZE)
@@ -170,7 +170,7 @@ class Game:
         self.renderer.draw_remote_players(self.player_name,remote_players, self.camera_x, self.camera_y)
         
         # Draw all local players
-        self.renderer.draw_players(self.players, self.camera_x, self.camera_y)
+        self.renderer.draw_players(self.players, self.camera_x, self.camera_y, self.GRID_SIZE)
         
         # Update display
         fps = self.clock.get_fps()

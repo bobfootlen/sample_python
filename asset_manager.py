@@ -51,6 +51,10 @@ class AssetManager:
         """Get sprite for a given direction"""
         return self.sprites.get(direction, self.sprites['up'])
     
+    def get_cursor(self, direction):
+        """Get cursor sprite"""
+        return self.sprites['cursor']
+
     def get_remote_sprite(self, direction):
         """Get remote player sprite for a given direction"""
         remote_key = f'remote_{direction}'
